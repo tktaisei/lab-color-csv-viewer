@@ -1,0 +1,219 @@
+* {
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+body {
+  margin: 0;
+  padding: 16px;
+  background: #f5f5f7;
+  color: #222;
+}
+h1 {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+h2 {
+  font-size: 1.2rem;
+  margin: 24px 0 8px;
+}
+
+/* 上部の単色入力 + 3Dプロットコンテナ */
+.app {
+  display: flex;
+  flex-direction: column;  /* 常に縦並び */
+  gap: 16px;
+  align-items: stretch;
+}
+.panel {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+.panel.inputs,
+.panel.plot {
+  flex: 1 1 auto;
+  max-width: 100%;
+  min-width: 0;
+}
+.panel.csv-panel {
+  margin-top: 8px;
+}
+
+.mode-switch {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.mode-switch button {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #ccc;
+  background: #fafafa;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.mode-switch button.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+.field-group {
+  margin-bottom: 12px;
+}
+.field-group label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+.field-row {
+  display: flex;
+  gap: 8px;
+}
+.field-row input,
+.field-row select {
+  flex: 1;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+}
+.hint {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 2px;
+}
+.color-preview {
+  margin-top: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+}
+.color-box {
+  width: 72px;
+  height: 48px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+.color-info {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  margin-left: 8px;
+}
+.btn-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.btn {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: #fafafa;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.btn.primary {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+#lab-plot {
+  width: 100%;
+  height: 480px;
+}
+
+/* CSVテーブル周り */
+.csv-table-container {
+  margin-top: 12px;
+  max-height: 400px;
+  overflow: auto;
+  font-size: 0.8rem;
+}
+.csv-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.csv-table th,
+.csv-table td {
+  border: 1px solid #ddd;
+  padding: 4px 6px;
+  word-break: break-all;
+}
+.csv-table th {
+  background: #f3f4f6;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.csv-color-swatch {
+  width: 40px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  margin: 0 auto;
+}
+.csv-radio-group {
+  display: flex;
+  gap: 12px;
+  font-size: 0.85rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.csv-radio-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 0;
+}
+.csv-cols-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.csv-cols-row .col-select-group {
+  flex: 1 1 120px;
+  min-width: 120px;
+}
+.csv-cols-row .col-select-group label {
+  margin-bottom: 2px;
+  font-size: 0.8rem;
+}
+.csv-max-rows {
+  max-width: 120px;
+}
+#csv-summary {
+  font-size: 0.75rem;
+  color: #555;
+  margin-top: 4px;
+}
+
+/* キー + フォルダ選択 部分 */
+.csv-key-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.csv-key-row .field-row {
+  flex: 1 1 200px;
+}
+.csv-key-row .field-row input[type="file"] {
+  padding: 2px;
+}
+.preview-img {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  display: block;
+  margin: 0 auto;
+}

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>RGB / Lab Color Visualizer</title>
+
+  <!-- Plotly（CDN）-->
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+  <!-- CSVパース用ライブラリ（PapaParse / CDN）-->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <!-- 外部CSS -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <h1>RGB / Lab 可視化ツール</h1>
+
+  <!-- 上部：単色入力 & 3Dプロット -->
+  <div class="app">
+    <!-- 入力パネル -->
+    <div class="panel inputs">
+      <div class="mode-switch">
+        <button id="mode-rgb" class="active">RGB で入力</button>
+        <button id="mode-lab">Lab で入力</button>
+      </div>
+
+      <!-- RGB 入力 -->
+      <div id="rgb-inputs">
+        <div class="field-group">
+          <label>RGB (0-255)</label>
+          <div class="field-row">
+            <input type="number" id="r-input" min="0" max="255" value="255" />
+            <input type="number" id="g-input" min="0" max="255" value="0" />
+            <input type="number" id="b-input" min="0" max="255" value="0" />
+          </div>
+          <div class="hint">左から R, G, B</div>
+        </div>
+      </div>
+
+      <!-- Lab 入力 -->
+      <div id="lab-inputs" style="display:none;">
+        <div class="field-group">
+          <label>Lab</label>
+          <div class="field-row">
+            <input type="number" id="l-input" step="0.1" value="53.2" />
+            <input type="number" id="a-input" step="0.1" value="80.1" />
+            <input type="number" id="bL-input" step="0.1" value="67.2" />
+          </div>
+          <div class="hint">左から L* (0-100), a*, b*</div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn primary" id="apply-btn">更新</button>
+        <button class="btn" id="reset-view-btn">3Dビューをリセット</button>
+      </div>
+
+      <div class="color-preview">
+        <div class="color-box" id="color-box"></div>
+        <div class="color-info">
+          <div id="rgb-info"></div>
+          <div id="lab-info"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plotパネル -->
+    <div class="panel plot">
+      <div id="lab-plot"></div>
+    </div>
+  </div>
+
+  <!-- 下部：CSVから色を可視化 -->
+  <h2>CSVから色を可視化</h2>
+  <div class="panel csv-panel">
+    <div class="field-group">
+      <label for="csv-file-input">CSVファイルを選択</label>
+      <input type="file" id="csv-file-input" accept=".csv,text/csv" />
+      <div class="hint">
+        先頭行がヘッダ（列名）になっている想定です。<br />
+        R,G,B や L,a,b は <b>それぞれ別の列</b>に入っている想定です。
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>色データの形式</label>
+      <div class="csv-radio-group">
+        <label><input type="radio" name="csv-color-mode" value="rgb" checked> RGB</label>
+        <label><input type="radio" name="csv-color-mode" value="lab"> Lab</label>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>色成分に対応する列</label>
+      <div id="csv-color-sets-wrapper">
+        <div class="csv-cols-row csv-color-set" data-set-index="0">
+          <div class="col-select-group">
+            <label id="csv-label-1">R列</label>
+            <select id="csv-col-r" disabled>
+              <option value="">CSVを読み込んでください</option>
+            </select>
+          </div>
+          <div class="col-select-group">
+            <label id="csv-label-2">G列</label>
+            <select id="csv-col-g" disabled>
+              <option value="">CSVを読み込んでください</option>
+            </select>
+          </div>
+          <div class="col-select-group">
+            <label id="csv-label-3">B列</label>
+            <select id="csv-col-b" disabled>
+              <option value="">CSVを読み込んでください</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn" id="csv-color-add-btn">色成分セット追加</button>
+        <button type="button" class="btn" id="csv-color-remove-btn">色成分セット削除</button>
+      </div>
+      <div class="hint">
+        RGB の場合は R/G/B の列を、Lab の場合は L/a/b の列をそれぞれ選んでください。<br />
+        色成分セットは最小1, 最大5個まで追加できます。
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label for="csv-max-rows">最大表示行数</label>
+      <div class="field-row">
+        <input type="number" id="csv-max-rows" class="csv-max-rows" value="300" min="10" step="10">
+      </div>
+      <div class="hint">行数が多い場合は数を減らすと軽くなります。</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn primary" id="csv-load-btn" disabled>CSVを表示</button>
+    </div>
+    <div id="csv-summary"></div>
+
+    <hr style="margin:16px 0; border:none; border-top:1px solid #e5e7eb;">
+
+    <!-- 追加機能：キー列 + 画像フォルダ マッチング -->
+    <div class="field-group">
+      <label>キー列と画像フォルダのマッチング（任意）</label>
+      <div class="csv-key-row">
+        <div class="field-row">
+          <select id="csv-key-col" disabled>
+            <option value="">キーとなる列を選択</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <input type="file" id="img-folder" webkitdirectory directory multiple />
+        </div>
+        <button class="btn" id="img-match-btn" disabled>画像マッチング実行</button>
+      </div>
+      <div class="hint">
+        例：キー列が <code>249900XF1021</code> のとき、<br>
+        フォルダ内に <code>249900XF1021_f.png</code> / <code>249900XF1021_r.png</code> があれば、<br>
+        テーブル右端に <b>_f / _r</b> 列として画像サムネイルが追加されます。
+      </div>
+    </div>
+
+    <div id="csv-table-container" class="csv-table-container"></div>
+  </div>
+
+  <!-- 共通ユーティリティ -->
+  <script src="js/utils.js"></script>
+  <!-- メインロジック -->
+  <script src="js/main.js"></script>
+</body>
+</html>
